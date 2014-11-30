@@ -16,6 +16,7 @@ class BagOfWords(object):
         self.dictionary = {}
         index = 0
         for sentence in self.sentences:
+            print str(index) + "sentences imported"
             self.extract_words(index, sentence)
             index += 1
         return self.dictionary
@@ -31,6 +32,7 @@ class BagOfWords(object):
         # helping feature which will discarded later
         features = np.zeros((self.numberOfSamples, 1)).astype(int)
         for word in sorted(self.dictionary):
+            print "create feature for word:" + str(word)
             features = self.create_feature_for_word(features, word)
         # discard helping feature
         features = features[:, 1:].astype(int)
