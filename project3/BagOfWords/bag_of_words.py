@@ -17,7 +17,7 @@ class BagOfWords(object):
         index = 0
         for sentence in self.sentences:
             print str(index) + "sentences imported"
-            self.extract_words(index, sentence)
+            self.extract_words(index, sentence.lower())
             index += 1
         return self.dictionary
 
@@ -55,6 +55,7 @@ class BagOfWords(object):
         words = str(sentence).split()
         for word in words:
             self.add_or_extend_word(index, word)
+
 
 class BagOfWordsTest(unittest.TestCase):
     def test_one_word(self):
@@ -105,6 +106,12 @@ class BagOfWordsTest(unittest.TestCase):
         actual = bag.get_features_and_labels()
         self.assertArrayEqual(actual, expected)
 
+    def test_lowercase(self):
+        bag = BagOfWords(np.array([["WORD word", 1, 2]]))
+        expected = np.array([[2, 1, 2]])
+        actual = bag.get_features_and_labels()
+        self.assertArrayEqual(actual, expected)
+
     def test_complicated_example(self):
         bag = BagOfWords(np.array([["this is a whole sentence", 2, 5],
                                    ["this is another one is it", 1000, 1989]]))
@@ -113,8 +120,10 @@ class BagOfWordsTest(unittest.TestCase):
         actual = bag.get_features_and_labels()
         self.assertArrayEqual(actual, expected)
 
+
     def assertArrayEqual(self, actual, expected):
         self.assertTrue(np.array_equal(actual, expected), "Features are not what expected")
+
 
 if __name__ == '__main__':
     unittest.main()
