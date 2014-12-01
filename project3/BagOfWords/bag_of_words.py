@@ -9,41 +9,36 @@ class BagOfWords(object):
         self.samples = samples
         self.numberOfSamples = self.samples.shape[0]
         self.sentences = self.samples[:, 0]
-        self.labels = self.samples[:, 1:]
+        self.labels = self.samples[:, 1:].astype(int)
         self.dictionary = self.create_dictionary()
+        self.numberOfWords = self.dictionary.keys().__len__()
+        self.features = np.hstack((np.zeros((self.numberOfSamples, self.numberOfWords)).astype(int), self.labels))
 
     def create_dictionary(self):
         self.dictionary = {}
         index = 0
         for sentence in self.sentences:
-            print str(index) + "sentences imported"
             self.extract_words(index, sentence.lower())
             index += 1
         return self.dictionary
 
     def get_features_and_labels(self):
-        features = self.create_features()
-        return self.join_features_and_labels(features)
+        self.create_features()
+        return self.join_features_and_labels()
 
-    def join_features_and_labels(self, features):
-        return np.hstack((features, self.labels)).astype(int)
+    def join_features_and_labels(self):
+        return self.features
 
     def create_features(self):
-        # helping feature which will discarded later
-        features = np.zeros((self.numberOfSamples, 1)).astype(int)
+        index = 0
         for word in sorted(self.dictionary):
-            print "create feature for word:" + str(word)
-            features = self.create_feature_for_word(features, word)
-        # discard helping feature
-        features = features[:, 1:].astype(int)
-        return features
+            print "create feature for word: " + str(word)
+            self.create_feature_for_word(word, index)
+            index += 1
 
-    def create_feature_for_word(self, features, word):
-        feature = np.zeros((self.numberOfSamples, 1))
+    def create_feature_for_word(self, word, wordIndex):
         for index in self.dictionary[word]:
-            feature[index] += 1
-        features = np.hstack((features, feature))
-        return features
+            self.features[index, wordIndex] += 1
 
     def add_or_extend_word(self, index, word):
         if word in self.dictionary:
@@ -122,6 +117,7 @@ class BagOfWordsTest(unittest.TestCase):
 
 
     def assertArrayEqual(self, actual, expected):
+        print actual
         self.assertTrue(np.array_equal(actual, expected), "Features are not what expected")
 
 
