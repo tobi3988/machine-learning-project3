@@ -42,6 +42,7 @@ class EveryWordOneFeature(object):
         print "------------------------------------------------------------------------------"
         prediction = np.vstack((cityPrediction, countryPrediction)).T
         return prediction
+        #return cityPrediction
 
 
 class MyTestCase(unittest.TestCase):

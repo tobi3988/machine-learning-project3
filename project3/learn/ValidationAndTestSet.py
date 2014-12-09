@@ -16,7 +16,7 @@ class MyTestCase(unittest.TestCase):
         predictor = EveryWordOneFeature()
         print "fit"
         predictor.fit(trainingData)
-        validationData = self.import_csv("validation.csv")
+        validationData = self.import_csv("validation.csv")[:7500,:]
         print "predict"
         print validationData
         validationResults = predictor.predict(validationData)
@@ -27,7 +27,8 @@ class MyTestCase(unittest.TestCase):
     def import_csv(self, csvName):
         reader = csv.reader(open(csvName, "rb"), delimiter=',')
         x = list(reader)
-        return np.array(x)[12000:16000,:]
+        return np.array(x)
+
 
     def test_something(self):
         self.makePrediction()
