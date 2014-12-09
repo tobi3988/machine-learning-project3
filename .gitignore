@@ -104,3 +104,5 @@ docs/_build/
 
 # PyBuilder
 target/
+project3/learn/validationresult.csv
+project3/learn/trainingfeatures.csv
