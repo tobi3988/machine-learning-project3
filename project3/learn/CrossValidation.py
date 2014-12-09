@@ -7,7 +7,7 @@ from sklearn.cross_validation import KFold
 
 class CrossValidation(object):
 
-    def run(self, predictor, folds, csv_name = "training.csv"):
+    def run(self, predictor, folds = 10, csv_name = "training.csv"):
         trainingData = self.import_csv(csv_name)
         return self.runWithProvidedDataset(predictor, folds, trainingData)
 
@@ -23,11 +23,12 @@ class CrossValidation(object):
         for train, test in kf:
             data_train, data_test = trainingData[train], trainingData[test]
             predictor.fit(data_test)
-            X_test = data_test[:, 0]
+            X_test = np.array([data_test[:, 0]]).T
             y_test = data_test[:, 1:]
             y_predict = predictor.predict(X_test)
 
             scores = self.calculateScores(y_predict, y_test)
+            print scores
             totalScores += scores
         avgScore = totalScores / folds
         return avgScore
@@ -45,7 +46,7 @@ class CrossValidation(object):
 
 class CrossValidationTest(unittest.TestCase):
     def test_cross_validation(self):
-        CrossValidation().run(MockPredictor(), 10)
+        print CrossValidation().run(MockPredictor(), 10)
 
 class MockPredictor(object):
 

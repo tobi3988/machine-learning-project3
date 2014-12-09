@@ -13,6 +13,7 @@ class BagOfWords(object):
         self.dictionary = self.create_dictionary()
         self.numberOfWords = self.dictionary.keys().__len__()
         self.features = np.hstack((np.zeros((self.numberOfSamples, self.numberOfWords)).astype(int), self.labels))
+        self.create_features()
 
     def create_dictionary(self):
         self.dictionary = {}
@@ -23,7 +24,7 @@ class BagOfWords(object):
         return self.dictionary
 
     def get_features_and_labels(self):
-        self.create_features()
+
         return self.join_features_and_labels()
 
     def join_features_and_labels(self):
@@ -32,7 +33,6 @@ class BagOfWords(object):
     def create_features(self):
         index = 0
         for word in sorted(self.dictionary):
-            print "create feature for word: " + str(word)
             self.create_feature_for_word(word, index)
             index += 1
 
@@ -50,6 +50,12 @@ class BagOfWords(object):
         words = str(sentence).split()
         for word in words:
             self.add_or_extend_word(index, word)
+
+    def get_features(self):
+        return self.features[:, :self.numberOfWords]
+
+    def get_labels(self):
+        return self.features[:, self.numberOfWords:]
 
 
 class BagOfWordsTest(unittest.TestCase):
@@ -115,9 +121,26 @@ class BagOfWordsTest(unittest.TestCase):
         actual = bag.get_features_and_labels()
         self.assertArrayEqual(actual, expected)
 
+    def test_get_only_features(self):
+        bag = BagOfWords(np.array([["this is a whole sentence", 3, 5]]))
+        expected = np.array([[1, 1, 1, 1, 1]])
+        actual = bag.get_features()
+        self.assertArrayEqual(actual, expected)
+
+    def test_get_only_labels(self):
+        bag = BagOfWords(np.array([["this is a whole sentence", 3, 5]]))
+        expected = np.array([[3, 5]])
+        actual = bag.get_labels()
+        self.assertArrayEqual(actual, expected)
+
+    def test_init_only_with_sentences(self):
+        bag = BagOfWords(np.array([["this is only a sentence"]]))
+        expected = np.array([[1, 1, 1, 1, 1]])
+        actual = bag.get_features()
+        self.assertArrayEqual(actual, expected)
+
 
     def assertArrayEqual(self, actual, expected):
-        print actual
         self.assertTrue(np.array_equal(actual, expected), "Features are not what expected")
 
 
