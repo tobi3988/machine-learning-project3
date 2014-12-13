@@ -41,8 +41,7 @@ class EveryWordOneFeature(object):
         print "Finished fitting countries in " + str((end - start)) + "s"
 
 
-    def fit(self, data):
-        self.data = data
+    def preprocessing(self, data):
         startOfPreprocessing = time.time()
         print "Start Preprocessing"
         lengthOfTrainingData = self.data.shape[0]
@@ -53,13 +52,15 @@ class EveryWordOneFeature(object):
         startOfFittingCities = time.time()
         print "Finished Preprocessing in " + str((startOfFittingCities - startOfPreprocessing)) + "s"
 
+    def fit(self, data):
+        self.data = data
+        self.preprocessing(data)
+
         t1 = threading.Thread(target=self.fit_cities)
         t2 = threading.Thread(target=self.fit_countries)
         t1.start()
-        startOfFittingCountries = time.time()
 
         t2.start()
-        self.startOfPredictingCities = time.time()
         t1.join()
         t2.join()
 
