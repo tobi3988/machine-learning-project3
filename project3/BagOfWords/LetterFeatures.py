@@ -6,7 +6,6 @@ import numpy as np
 
 
 class LetterFeatures(object):
-
     def count_letters(self, feature, sentence):
         feature[0, 0] = sentence.count("a")
         feature[0, 1] = sentence.count("b")
@@ -42,6 +41,14 @@ class LetterFeatures(object):
             self.count_letters(feature, sentence)
         return feature
 
+    def get(self, data):
+        features = np.zeros((data.shape[0], 26))
+        index = 0
+        for sentence in data:
+            features[index] = self.get_from_string(sentence[0])
+            index += 1
+        return features
+
 
 class TestLetterFeatures(unittest.TestCase):
     def test_empty_string(self):
@@ -60,9 +67,9 @@ class TestLetterFeatures(unittest.TestCase):
     def test_two_a(self):
         features = LetterFeatures()
         actual = features.get_from_string("aa")
-        expected = np.zeros((1,26))
-        expected[0,0] = 2
-        self.assertArrayEqual(actual,expected)
+        expected = np.zeros((1, 26))
+        expected[0, 0] = 2
+        self.assertArrayEqual(actual, expected)
 
     def test_case_insensitive(self):
         features = LetterFeatures()
@@ -74,20 +81,48 @@ class TestLetterFeatures(unittest.TestCase):
     def test_one_b(self):
         features = LetterFeatures()
         actual = features.get_from_string("b")
-        expected = np.zeros((1,26))
+        expected = np.zeros((1, 26))
         expected[0, 1] = 1
-        self.assertArrayEqual(actual,expected)
+        self.assertArrayEqual(actual, expected)
 
     def test_one_alphabet(self):
         features = LetterFeatures()
         actual = features.get_from_string("abcdefghijklmnopqrstuvwxyz")
-        expected = np.ones((1,26))
-        self.assertArrayEqual(actual,expected)
+        expected = np.ones((1, 26))
+        self.assertArrayEqual(actual, expected)
+
+    def test_more_difficult(self):
+        features = LetterFeatures()
+        actual = features.get_from_string("abbazzzy")
+        expected = np.zeros((1, 26))
+        expected[0, 0] = 2
+        expected[0, 1] = 2
+        expected[0, 25] = 3
+        expected[0, 24] = 1
+        self.assertArrayEqual(actual, expected)
 
     def test_two_empty_string(self):
         features = LetterFeatures()
-        actual = features.get(np.array([[""],[""]]))
+        actual = features.get(np.array([[""], [""]]))
+        expected = np.zeros((2, 26))
+        self.assertArrayEqual(actual, expected)
 
+    def test_two_as(self):
+        featuers = LetterFeatures()
+        actual = featuers.get(np.array([["a"], ["a"]]))
+        expected = np.zeros((2, 26))
+        expected[0, 0] = 1
+        expected[1, 0] = 1
+        self.assertArrayEqual(actual, expected)
+
+    def test_fancy(self):
+        features = LetterFeatures()
+        actual = features.get(np.array([["abcdefghijklmnopqrstuvwxyz"], ["ha ha"]]))
+        expected = np.ones((2, 26))
+        expected[1] = np.zeros((1, 26))
+        expected[1, 0] = 2
+        expected[1, 7] = 2
+        self.assertArrayEqual(actual, expected)
 
     def assertArrayEqual(self, actual, expected):
         self.assertTrue(np.array_equal(actual, expected), "Features are not what expected")
