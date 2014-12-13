@@ -1,3 +1,4 @@
+from project3.BagOfWords.LetterFeatures import LetterFeatures
 from project3.BagOfWords.bag_of_words import BagOfWords
 from project3.learn.CrossValidation import CrossValidation
 from project3.learn.TobisFirstLearner import EveryWordOneFeature
@@ -13,8 +14,12 @@ from sklearn import svm
 
 
 class LetterLearner(EveryWordOneFeature):
-    def preprocessing(self, data):
-        pass
+    def preprocess_training_data(self, data):
+        features = LetterFeatures().get(data[:, 0])
+        self.fitting_data = np.hstack((features, data[:,1:]))
+
+    def preprocess_predict_data(self, predict):
+        self.predict_data = LetterFeatures().get(predict)
 
 
 
