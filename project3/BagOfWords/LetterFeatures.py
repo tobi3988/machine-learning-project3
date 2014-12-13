@@ -84,6 +84,10 @@ class TestLetterFeatures(unittest.TestCase):
         expected = np.ones((1,26))
         self.assertArrayEqual(actual,expected)
 
+    def test_two_empty_string(self):
+        features = LetterFeatures()
+        actual = features.get(np.array([[""],[""]]))
+
 
     def assertArrayEqual(self, actual, expected):
         self.assertTrue(np.array_equal(actual, expected), "Features are not what expected")
