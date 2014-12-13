@@ -22,7 +22,7 @@ class CrossValidation(object):
         totalScores = 0
         for train, test in kf:
             data_train, data_test = trainingData[train], trainingData[test]
-            predictor.fit(data_test)
+            predictor.fit(data_train)
             X_test = np.array([data_test[:, 0]]).T
             y_test = data_test[:, 1:]
             y_predict = predictor.predict(X_test)

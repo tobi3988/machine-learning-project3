@@ -29,7 +29,8 @@ class EveryWordOneFeature(object):
         startOfPreprocessing = time.time()
         print "Start Preprocessing"
         lengthOfPredictData = predict.shape[0]
-        lengthOfTrainingData = predict.shape[0]
+        lengthOfTrainingData = self.data.shape[0]
+        print "length of trainingData = " + str(lengthOfTrainingData)
         predict = np.hstack((predict, np.zeros((lengthOfPredictData, 2)).astype(int)))
         trainingAndPredictData = np.vstack((self.data, predict))
         del self.data
