@@ -9,6 +9,8 @@ import threading
 import time
 import numpy as np
 from sklearn import svm
+from sklearn.multiclass import OneVsRestClassifier
+
 
 
 class EveryWordOneFeature(object):
@@ -17,10 +19,10 @@ class EveryWordOneFeature(object):
         self.gamma = gamma
         self.kernelType = kernelType
         self.data = np.ones((1000, 1000))
-        self.cityClassifier = svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False,
-                                      cache_size=1000)
-        self.countryClassifier = svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False,
-                                         cache_size=1000)
+        self.cityClassifier = OneVsRestClassifier(svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False,
+                                      cache_size=1000))
+        self.countryClassifier = OneVsRestClassifier(svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False,
+                                         cache_size=1000))
         self.bag = None
         self.numberOfWords = 0
         self.fitting_data = None
