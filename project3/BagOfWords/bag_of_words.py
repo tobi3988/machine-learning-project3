@@ -13,7 +13,6 @@ class BagOfWords(object):
         self.dictionary = self.create_dictionary()
         self.numberOfWords = self.dictionary.keys().__len__()
         self.features = np.hstack((np.zeros((self.numberOfSamples, self.numberOfWords)).astype(int), self.labels))
-        print "allocated feature array"
         self.create_features()
 
     def create_dictionary(self):
@@ -59,8 +58,19 @@ class BagOfWords(object):
         return self.features[:, self.numberOfWords:]
 
     def get_validation_features(self, validationSet):
-        for word in self.dictionary:
+        self.sentences = validationSet[:,0]
+        valdidationLength = validationSet.shape[0]
+        self.features = np.zeros((valdidationLength,self.numberOfWords))
+        index = 0
+        for word in self.dictionary.keys():
             self.dictionary[word] = []
+        for sentence in self.sentences:
+            words = str(sentence).split()
+            for word in words:
+                self.dictionary[word].append(index)
+            index += 1
+        self.create_features()
+        return self.features
 
 
 
@@ -149,7 +159,7 @@ class BagOfWordsTest(unittest.TestCase):
     def test_get_features_for_validation(self):
         bag = BagOfWords(np.array([["this is only a sentence"]]))
         validationData = np.array([["this is only a only"]])
-        expected = np.array([[1,1, 2, 0, 1]])
+        expected = np.array([[1, 1, 2, 0, 1]])
         actual = bag.get_validation_features(validationData)
         self.assertArrayEqual(actual, expected)
 
