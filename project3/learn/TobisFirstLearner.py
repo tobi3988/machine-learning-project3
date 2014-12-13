@@ -23,6 +23,8 @@ class EveryWordOneFeature(object):
                                          cache_size=1000)
         self.bag = None
         self.numberOfWords = 0
+        self.fitting_data = None
+        self.predict_data = None
 
     def fit_cities(self):
         print "Start Fitting cities"
@@ -41,7 +43,7 @@ class EveryWordOneFeature(object):
         print "Finished fitting countries in " + str((end - start)) + "s"
 
 
-    def preprocessing(self, data):
+    def preprocess_training_data(self, data):
         startOfPreprocessing = time.time()
         print "Start Preprocessing"
         lengthOfTrainingData = self.data.shape[0]
@@ -54,7 +56,7 @@ class EveryWordOneFeature(object):
 
     def fit(self, data):
         self.data = data
-        self.preprocessing(data)
+        self.preprocess_training_data(data)
 
         t1 = threading.Thread(target=self.fit_cities)
         t2 = threading.Thread(target=self.fit_countries)
@@ -81,8 +83,11 @@ class EveryWordOneFeature(object):
         print "finished predicting countries in " + str((end - start)) + "s"
         self.countryPrediction
 
-    def predict(self, predict):
+    def preprocess_predict_data(self, predict):
         self.predict_data = self.bag.get_get_validation_features(predict)
+
+    def predict(self, predict):
+        self.preprocess_predict_data(predict)
         t1 = threading.Thread(target=self.predict_cities)
         t2 = threading.Thread(target=self.predict_countries)
         t1.start()
