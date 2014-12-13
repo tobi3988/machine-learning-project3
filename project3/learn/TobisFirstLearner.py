@@ -24,19 +24,19 @@ class EveryWordOneFeature(object):
         self.bag = None
         self.numberOfWords = 0
 
-    def fit_cities(self, transformed_data):
-        print "Starting Fitting cities"
+    def fit_cities(self):
+        print "Start Fitting cities"
         start = time.time()
-        self.cityClassifier.fit(transformed_data[:, :self.numberOfWords],
-                                transformed_data[:, self.numberOfWords])
+        self.cityClassifier.fit(self.fitting_data[:, :self.numberOfWords],
+                                self.fitting_data[:, self.numberOfWords])
         end = time.time()
         print "Finished Fitting cities in " + str((end - start)) + "s"
 
-    def fit_countries(self, transformed_data):
+    def fit_countries(self):
         print "Start Fitting countries"
         start = time.time()
-        self.countryClassifier.fit(transformed_data[:, :self.numberOfWords],
-                                   transformed_data[:, (self.numberOfWords + 1)])
+        self.countryClassifier.fit(self.fitting_data[:, :self.numberOfWords],
+                                   self.fitting_data[:, (self.numberOfWords + 1)])
         end = time.time()
         print "Finished fitting countries in " + str((end - start)) + "s"
 
@@ -48,13 +48,13 @@ class EveryWordOneFeature(object):
         lengthOfTrainingData = self.data.shape[0]
         print "length of trainingData = " + str(lengthOfTrainingData)
         self.bag = BagOfWords(data)
-        transformed_data = self.bag.get_features_and_labels()
-        self.numberOfWords = transformed_data.shape[1] - 2
+        self.fitting_data = self.bag.get_features_and_labels()
+        self.numberOfWords = self.fitting_data.shape[1] - 2
         startOfFittingCities = time.time()
         print "Finished Preprocessing in " + str((startOfFittingCities - startOfPreprocessing)) + "s"
 
-        t1 = threading.Thread(target=self.fit_cities(transformed_data))
-        t2 = threading.Thread(target=self.fit_countries(transformed_data))
+        t1 = threading.Thread(target=self.fit_cities)
+        t2 = threading.Thread(target=self.fit_countries)
         t1.start()
         startOfFittingCountries = time.time()
 
@@ -64,26 +64,26 @@ class EveryWordOneFeature(object):
         t2.join()
 
 
-    def predict_cities(self, transformed_data):
+    def predict_cities(self):
         print "Start predict cities"
         start = time.time()
-        self.cityClassifier.predict(transformed_data[:, :self.numberOfWords])
+        self.cityClassifier.predict(self.predict_data[:, :self.numberOfWords])
         end = time.time()
         print "Finished predicting cities in " + str((end - start)) + "s"
         self.cityPrediction
 
-    def predict_countries(self, transformed_data):
+    def predict_countries(self):
         start = time.time()
         print "start predicting countries"
-        self.countryClassifier.predict(transformed_data[:, :self.numberOfWords])
+        self.countryClassifier.predict(self.predict_data[:, :self.numberOfWords])
         end = time.time()
         print "finished predicting countries in " + str((end - start)) + "s"
         self.countryPrediction
 
     def predict(self, predict):
-        transformed_data = self.bag.get_get_validation_features(predict)
-        t1 = threading.Thread(target=self.predict_cities(transformed_data))
-        t2 = threading.Thread(target=self.predict_countries(transformed_data))
+        self.predict_data = self.bag.get_get_validation_features(predict)
+        t1 = threading.Thread(target=self.predict_cities)
+        t2 = threading.Thread(target=self.predict_countries)
         t1.start()
         t2.start()
         t1.join()
