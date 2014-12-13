@@ -5,6 +5,7 @@ __author__ = 'tobi'
 
 import unittest
 import gc
+import threading
 import time
 import numpy as np
 from sklearn import svm
@@ -23,6 +24,23 @@ class EveryWordOneFeature(object):
         self.bag = None
         self.numberOfWords = 0
 
+    def fit_cities(self, transformed_data):
+        print "Starting Fitting cities"
+        start = time.time()
+        self.cityClassifier.fit(transformed_data[:, :self.numberOfWords],
+                                transformed_data[:, self.numberOfWords])
+        end = time.time()
+        print "Finished Fitting cities in " + str((end - start)) + "s"
+
+    def fit_countries(self, transformed_data):
+        print "Start Fitting countries"
+        start = time.time()
+        self.countryClassifier.fit(transformed_data[:, :self.numberOfWords],
+                                   transformed_data[:, (self.numberOfWords + 1)])
+        end = time.time()
+        print "Finished fitting countries in " + str((end - start)) + "s"
+
+
     def fit(self, data):
         self.data = data
         startOfPreprocessing = time.time()
@@ -34,31 +52,44 @@ class EveryWordOneFeature(object):
         self.numberOfWords = transformed_data.shape[1] - 2
         startOfFittingCities = time.time()
         print "Finished Preprocessing in " + str((startOfFittingCities - startOfPreprocessing)) + "s"
-        print "Starting Fitting cities"
-        self.cityClassifier.fit(transformed_data[:, :self.numberOfWords],
-                                transformed_data[:, self.numberOfWords])
-        startOfFittingCountries = time.time()
-        print "Finished Fitting cities in " + str((startOfFittingCountries - startOfFittingCities)) + "s"
-        print "Starting Fitting countries"
-        self.countryClassifier.fit(transformed_data[:, :self.numberOfWords],
-                                   transformed_data[:, (self.numberOfWords + 1)])
-        self.startOfPredictingCities = time.time()
-        print "Finished fittign countries in " + str((self.startOfPredictingCities - startOfFittingCountries)) + "s"
-        print "Start predict cities"
 
+        t1 = threading.Thread(target=self.fit_cities(transformed_data))
+        t2 = threading.Thread(target=self.fit_countries(transformed_data))
+        t1.start()
+        startOfFittingCountries = time.time()
+
+        t2.start()
+        self.startOfPredictingCities = time.time()
+        t1.join()
+        t2.join()
+
+
+    def predict_cities(self, transformed_data):
+        print "Start predict cities"
+        start = time.time()
+        self.cityClassifier.predict(transformed_data[:, :self.numberOfWords])
+        end = time.time()
+        print "Finished predicting cities in " + str((end - start)) + "s"
+        self.cityPrediction
+
+    def predict_countries(self, transformed_data):
+        start = time.time()
+        print "start predicting countries"
+        self.countryClassifier.predict(transformed_data[:, :self.numberOfWords])
+        end = time.time()
+        print "finished predicting countries in " + str((end - start)) + "s"
+        self.countryPrediction
 
     def predict(self, predict):
-        transformed_data = self.bag.get_get_validation_features
-        cityPrediction = self.cityClassifier.predict(transformed_data[:, :self.numberOfWords])
-        startOfPredictingCountries = time.time()
-        print "Finished predicting cities in " + str((startOfPredictingCountries - self.startOfPredictingCities)) + "s"
-        print "start predicting countries"
-        countryPrediction = self.countryClassifier.predict(transformed_data[:, :self.numberOfWords])
-        endOfPredictingCountries = time.time()
-        print "finished predicting countries in " + str((endOfPredictingCountries - startOfPredictingCountries)) + "s"
-        prediction = np.vstack((cityPrediction, countryPrediction)).T
+        transformed_data = self.bag.get_get_validation_features(predict)
+        t1 = threading.Thread(target=self.predict_cities(transformed_data))
+        t2 = threading.Thread(target=self.predict_countries(transformed_data))
+        t1.start()
+        t2.start()
+        t1.join()
+        t2.join()
+        prediction = np.vstack((self.cityPrediction, self.countryPrediction)).T
         return prediction
-        # return cityPrediction
 
 
 class MyTestCase(unittest.TestCase):
