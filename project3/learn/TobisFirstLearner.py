@@ -10,6 +10,7 @@ import time
 import numpy as np
 from sklearn import svm
 from sklearn.multiclass import OneVsRestClassifier
+from sklearn.multiclass import OneVsOneClassifier
 
 
 
@@ -19,12 +20,12 @@ class EveryWordOneFeature(object):
         self.gamma = gamma
         self.kernelType = kernelType
         self.data = np.ones((1000, 1000))
-        self.cityClassifier = OneVsRestClassifier(svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False,
+        self.cityClassifier = OneVsOneClassifier(svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False,
                                       cache_size=1000))
-        self.countryClassifier = OneVsRestClassifier(svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False,
+        self.countryClassifier = OneVsOneClassifier(svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False,
                                          cache_size=1000))
         self.bag = None
-        self.numberOfWords = 0
+        self.numberOfFeatures = 0
         self.fitting_data = None
         self.predict_data = None
         self.cityPrediction = None
@@ -33,16 +34,16 @@ class EveryWordOneFeature(object):
     def fit_cities(self):
         print "Start Fitting cities"
         start = time.time()
-        self.cityClassifier.fit(self.fitting_data[:, :self.numberOfWords],
-                                self.fitting_data[:, self.numberOfWords])
+        self.cityClassifier.fit(self.fitting_data[:, :self.numberOfFeatures],
+                                self.fitting_data[:, self.numberOfFeatures])
         end = time.time()
         print "Finished Fitting cities in " + str((end - start)) + "s"
 
     def fit_countries(self):
         print "Start Fitting countries"
         start = time.time()
-        self.countryClassifier.fit(self.fitting_data[:, :self.numberOfWords],
-                                   self.fitting_data[:, (self.numberOfWords + 1)])
+        self.countryClassifier.fit(self.fitting_data[:, :self.numberOfFeatures],
+                                   self.fitting_data[:, (self.numberOfFeatures + 1)])
         end = time.time()
         print "Finished fitting countries in " + str((end - start)) + "s"
 
@@ -54,7 +55,7 @@ class EveryWordOneFeature(object):
         print "length of trainingData = " + str(lengthOfTrainingData)
         self.bag = BagOfWords(data)
         self.fitting_data = self.bag.get_features_and_labels()
-        self.numberOfWords = self.fitting_data.shape[1] - 2
+        self.numberOfFeatures = self.fitting_data.shape[1] - 2
         startOfFittingCities = time.time()
         print "Finished Preprocessing in " + str((startOfFittingCities - startOfPreprocessing)) + "s"
 
@@ -62,19 +63,20 @@ class EveryWordOneFeature(object):
         self.data = data
         self.preprocess_training_data(data)
 
-        t1 = threading.Thread(target=self.fit_cities)
+        #t1 = threading.Thread(target=self.fit_cities)
         t2 = threading.Thread(target=self.fit_countries)
-        t1.start()
 
+        #t1.start()
         t2.start()
-        t1.join()
+        #t1.join()
         t2.join()
 
 
     def predict_cities(self):
         print "Start predict cities"
         start = time.time()
-        self.cityPrediction = self.cityClassifier.predict(self.predict_data[:, :self.numberOfWords])
+        print self.predict_data[:, :self.numberOfFeatures]
+        self.cityPrediction = self.cityClassifier.predict(self.predict_data[:, :self.numberOfFeatures])
         end = time.time()
         print "Finished predicting cities in " + str((end - start)) + "s"
 
@@ -82,7 +84,8 @@ class EveryWordOneFeature(object):
     def predict_countries(self):
         start = time.time()
         print "start predicting countries"
-        self.countryPrediction = self.countryClassifier.predict(self.predict_data[:, :self.numberOfWords])
+        print self.predict_data
+        self.countryPrediction = self.countryClassifier.predict(self.predict_data[:, :self.numberOfFeatures])
         end = time.time()
         print "finished predicting countries in " + str((end - start)) + "s"
 
@@ -92,11 +95,11 @@ class EveryWordOneFeature(object):
 
     def predict(self, predict):
         self.preprocess_predict_data(predict)
-        t1 = threading.Thread(target=self.predict_cities)
+        #t1 = threading.Thread(target=self.predict_cities)
         t2 = threading.Thread(target=self.predict_countries)
-        t1.start()
+        #t1.start()
         t2.start()
-        t1.join()
+        #t1.join()
         t2.join()
         prediction = np.vstack((self.cityPrediction, self.countryPrediction)).T
         return prediction
