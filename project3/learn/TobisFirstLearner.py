@@ -13,31 +13,32 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.multiclass import OneVsOneClassifier
 
 
-
 class EveryWordOneFeature(object):
-    def __init__(self, slack=1, gamma=1, kernelType = 'linear'):
+    def __init__(self, slack=1, gamma=1, kernelType='linear'):
         self.slack = slack
         self.gamma = gamma
         self.kernelType = kernelType
         self.data = np.ones((1000, 1000))
-        self.cityClassifier = OneVsOneClassifier(svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False,
-                                      cache_size=1000))
-        self.countryClassifier = OneVsOneClassifier(svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False,
-                                         cache_size=1000))
+        self.cityClassifier = {}
+        self.countryClassifier = OneVsOneClassifier(
+            svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False,
+                    cache_size=1000))
         self.bag = None
         self.numberOfFeatures = 0
         self.fitting_data = None
         self.predict_data = None
-        self.cityPrediction = None
+        self.cityPrediction = {}
         self.countryPrediction = None
 
-    def fit_cities(self):
-        print "Start Fitting cities"
+    def fit_cities(self, trainingData, cityCode):
+        print "Start fitting cities for country "  + str(cityCode)
+        self.cityClassifier[cityCode] = OneVsOneClassifier(
+            svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False))
         start = time.time()
-        self.cityClassifier.fit(self.fitting_data[:, :self.numberOfFeatures],
-                                self.fitting_data[:, self.numberOfFeatures])
+        self.cityClassifier[cityCode].fit(trainingData[:, :self.numberOfFeatures],
+                                trainingData[:, self.numberOfFeatures])
         end = time.time()
-        print "Finished Fitting cities in " + str((end - start)) + "s"
+        print "Finished fitting cities in " + str((end - start)) + "s"
 
     def fit_countries(self):
         print "Start Fitting countries"
@@ -63,20 +64,25 @@ class EveryWordOneFeature(object):
         self.data = data
         self.preprocess_training_data(data)
 
-        #t1 = threading.Thread(target=self.fit_cities)
-        t2 = threading.Thread(target=self.fit_countries)
+        # t1 = threading.Thread(target=self.fit_cities)
+        cityCodes = np.unique(self.fitting_data[:, self.numberOfFeatures + 1])
+        for cityCode in cityCodes:
+            cityCode
+            countryIndices = np.where(self.fitting_data[:, self.numberOfFeatures + 1] == cityCode)[0]
+            self.fit_cities(self.fitting_data[countryIndices], cityCode)
 
+        t2 = threading.Thread(target=self.fit_countries)
         #t1.start()
         t2.start()
         #t1.join()
         t2.join()
 
 
-    def predict_cities(self):
+    def predict_cities(self,data,cityCode):
         print "Start predict cities"
         start = time.time()
-        print self.predict_data[:, :self.numberOfFeatures]
-        self.cityPrediction = self.cityClassifier.predict(self.predict_data[:, :self.numberOfFeatures])
+        print data[:, :self.numberOfFeatures]
+        self.cityPrediction[cityCode] = self.cityClassifier[cityCode].predict(data[:, :self.numberOfFeatures])
         end = time.time()
         print "Finished predicting cities in " + str((end - start)) + "s"
 
@@ -95,13 +101,22 @@ class EveryWordOneFeature(object):
 
     def predict(self, predict):
         self.preprocess_predict_data(predict)
-        #t1 = threading.Thread(target=self.predict_cities)
-        t2 = threading.Thread(target=self.predict_countries)
+        # t1 = threading.Thread(target=self.predict_cities)
+        self.predict_countries()
+        self.countryPrediction
+        cityCodes = np.unique(self.countryPrediction)
+        joinedCityPredictions = np.zeros(predict.shape[0])
+        for cityCode in cityCodes:
+            cityCode
+            countryIndices = np.where(self.countryPrediction == cityCode)[0]
+            self.predict_cities(self.predict_data[countryIndices], cityCode)
+            joinedCityPredictions[countryIndices] = self.cityPrediction[cityCode]
         #t1.start()
-        t2.start()
+        #t2.start()
         #t1.join()
-        t2.join()
-        prediction = np.vstack((self.cityPrediction, self.countryPrediction)).T
+        #t2.join()
+        print joinedCityPredictions
+        prediction = np.vstack((joinedCityPredictions, self.countryPrediction)).T
         return prediction
 
 
