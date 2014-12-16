@@ -29,7 +29,7 @@ class LetterLearner(EveryWordOneFeature):
 
 class MyTestCase(unittest.TestCase):
     def test_letter(self):
-        predictor = LetterLearner(kernelType="rbf")
+        predictor = LetterLearner(kernelType="linear", slack=0.01)
         crossval = CrossValidation()
         print "CrossVal result: " + str(crossval.run(predictor, 10))
 
