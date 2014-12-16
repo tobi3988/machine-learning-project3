@@ -26,6 +26,7 @@ class EveryWordOneFeature(object):
                                          cache_size=1000))
         self.bag = None
         self.numberOfFeatures = 0
+        #Features and labels
         self.fitting_data = None
         self.predict_data = None
         self.cityPrediction = None
@@ -62,15 +63,17 @@ class EveryWordOneFeature(object):
     def fit(self, data):
         self.data = data
         self.preprocess_training_data(data)
-        self.numberOfFeatures = self.fitting_data[1]
+        self.numberOfFeatures = self.fitting_data.shape[1] - 2
 
+        self.fit_countries()
         #t1 = threading.Thread(target=self.fit_cities)
-        t2 = threading.Thread(target=self.fit_countries)
+        #t2 = threading.Thread(target=self.fit_countries)
+
 
         #t1.start()
-        t2.start()
+        #t2.start()
         #t1.join()
-        t2.join()
+        #t2.join()
 
 
     def predict_cities(self):
