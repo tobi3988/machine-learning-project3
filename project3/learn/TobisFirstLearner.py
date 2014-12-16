@@ -62,6 +62,7 @@ class EveryWordOneFeature(object):
     def fit(self, data):
         self.data = data
         self.preprocess_training_data(data)
+        self.numberOfFeatures = self.fitting_data[1]
 
         #t1 = threading.Thread(target=self.fit_cities)
         t2 = threading.Thread(target=self.fit_countries)
@@ -95,6 +96,7 @@ class EveryWordOneFeature(object):
 
     def predict(self, predict):
         self.preprocess_predict_data(predict)
+        self.numberOfFeatures = self.predict_data[1]
         #t1 = threading.Thread(target=self.predict_cities)
         t2 = threading.Thread(target=self.predict_countries)
         #t1.start()
