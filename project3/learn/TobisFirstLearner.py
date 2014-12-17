@@ -30,7 +30,7 @@ class EveryWordOneFeature(object):
         #Features and labels
         self.fitting_data = None
         self.predict_data = None
-        self.cityPrediction = None
+        self.cityPrediction = {}
         self.countryPrediction = None
 
     def fit_cities(self, trainingData, cityCode):
@@ -90,6 +90,7 @@ class EveryWordOneFeature(object):
         print "Start predict cities"
         start = time.time()
         print data[:, :self.numberOfFeatures]
+        print self.cityPrediction
         self.cityPrediction[cityCode] = self.cityClassifier[cityCode].predict(data[:, :self.numberOfFeatures])
         end = time.time()
         print "Finished predicting cities in " + str((end - start)) + "s"
@@ -112,8 +113,6 @@ class EveryWordOneFeature(object):
         self.numberOfFeatures = self.predict_data.shape[1]
         # t1 = threading.Thread(target=self.predict_cities)
         self.predict_countries()
-        self.countryPrediction
-        self.cityPrediction
         cityCodes = np.unique(self.countryPrediction)
         joinedCityPredictions = np.zeros(predict.shape[0])
         for cityCode in cityCodes:
@@ -125,7 +124,6 @@ class EveryWordOneFeature(object):
         #t2.start()
         #t1.join()
         #t2.join()
-        print joinedCityPredictions
         prediction = np.vstack((joinedCityPredictions, self.countryPrediction)).T
         return prediction
 

@@ -24,7 +24,6 @@ class LetterLearner(EveryWordOneFeature):
         self.predict_data = LetterFeatures().get(predict).astype(int)
         self.numberOfFeatures = self.predict_data.shape[1]
         number_of_cities_to_predict = self.predict_data.shape[0]
-        self.cityPrediction = np.zeros(number_of_cities_to_predict)
         print self.numberOfFeatures
 
 
