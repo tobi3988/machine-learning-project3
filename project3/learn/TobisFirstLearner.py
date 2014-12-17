@@ -14,12 +14,14 @@ from sklearn.multiclass import OneVsOneClassifier
 
 
 class EveryWordOneFeature(object):
-    def __init__(self, slack=1, gamma=1, kernelType='linear'):
+    def __init__(self, slack=1, gamma=1, kernelType='linear', gram=1):
+        self.gram = gram
         self.slack = slack
         self.gamma = gamma
         self.kernelType = kernelType
         self.data = np.ones((1000, 1000))
         self.cityClassifier = {}
+        #TODO: Wieso nimmst du OneVsOne und nicht OneVsRest? Ginge OneVsRest nicht schneller?
         self.countryClassifier = OneVsOneClassifier(
             svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False,
                     cache_size=1000))
@@ -28,11 +30,12 @@ class EveryWordOneFeature(object):
         #Features and labels
         self.fitting_data = None
         self.predict_data = None
-        self.cityPrediction = {}
+        self.cityPrediction = None
         self.countryPrediction = None
 
     def fit_cities(self, trainingData, cityCode):
         print "Start fitting cities for country "  + str(cityCode)
+        #TODO: Wieso nimmst du OneVsOne und nicht OneVsRest? Ginge OneVsRest nicht schneller?
         self.cityClassifier[cityCode] = OneVsOneClassifier(
             svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False))
         start = time.time()
@@ -87,6 +90,7 @@ class EveryWordOneFeature(object):
         print "Start predict cities"
         start = time.time()
         print data[:, :self.numberOfFeatures]
+
         self.cityPrediction[cityCode] = self.cityClassifier[cityCode].predict(data[:, :self.numberOfFeatures])
         end = time.time()
         print "Finished predicting cities in " + str((end - start)) + "s"
@@ -110,6 +114,7 @@ class EveryWordOneFeature(object):
         # t1 = threading.Thread(target=self.predict_cities)
         self.predict_countries()
         self.countryPrediction
+        self.cityPrediction
         cityCodes = np.unique(self.countryPrediction)
         joinedCityPredictions = np.zeros(predict.shape[0])
         for cityCode in cityCodes:
