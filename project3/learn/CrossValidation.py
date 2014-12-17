@@ -41,8 +41,8 @@ class CrossValidation(object):
         numberOfFalseCities= sum(cityCodes != 0)
         numberOfFalseCountrys = sum(countryCodes != 0)
         score = (numberOfFalseCities + 0.25*numberOfFalseCountrys)/ lengthOfTest
-        print "number of wrong predicted cities: " +str(numberOfFalseCities) + " (" + str(numberOfFalseCities/lengthOfTest*100) + "%)"
-        print "number of wrong predicted countries: " +str(numberOfFalseCountrys) + " (" + str(numberOfFalseCountrys/lengthOfTest*100) + "%)"
+        print "number of wrong predicted cities: " +str(numberOfFalseCities) + " (" + str(float(numberOfFalseCities)/lengthOfTest*100) + "%)"
+        print "number of wrong predicted countries: " +str(numberOfFalseCountrys) + " (" + str(float(numberOfFalseCountrys)/lengthOfTest*100) + "%)"
         return score
 
 
