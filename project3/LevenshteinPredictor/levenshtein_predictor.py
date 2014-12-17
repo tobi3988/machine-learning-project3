@@ -13,6 +13,8 @@ import Levenshtein
 #0.750706083178
 #
 
+#TODO: Länge der Wörter in Berechnung der metrik einbeziehen. z.B. aaaaaaa und aaaaaac sollten näher zusammen sein als aaa und aac
+#TODO: Eine Option wäre eine Prediction nur zu benutzen, falls Similarity-Metrik grösser als ein threshold ist...
 class Levenshtein_predictor(object):
 
     def __init__(self):

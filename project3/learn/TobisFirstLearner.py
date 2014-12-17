@@ -86,11 +86,10 @@ class EveryWordOneFeature(object):
         #t2.join()
 
 
-    def predict_cities(self,data,cityCode):
+    def predict_cities(self, data, cityCode):
         print "Start predict cities"
         start = time.time()
         print data[:, :self.numberOfFeatures]
-
         self.cityPrediction[cityCode] = self.cityClassifier[cityCode].predict(data[:, :self.numberOfFeatures])
         end = time.time()
         print "Finished predicting cities in " + str((end - start)) + "s"

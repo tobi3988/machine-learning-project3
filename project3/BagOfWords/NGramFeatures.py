@@ -4,7 +4,10 @@ import unittest
 
 import numpy as np
 
-
+# Erstellt die Features gemäss der im Konstruktor genannten Länge der n-Grams. n-Grams welche nie vorkommen werden auch nicht verwendet.
+# n = 1 ersetzt die LetterFeatures Klasse
+#TODO: Evtl wäre es eine Möglichkeit, die Features mit einer tf-idf Methode zu gewichten... Allerdings ist nicht klar, ob
+#TODO: häufige oder seltene features wichtig sind...
 class NGramFeatures(object):
     def __init__(self, gram=2):
         self.gram = gram
