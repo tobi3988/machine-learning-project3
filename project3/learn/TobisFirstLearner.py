@@ -34,14 +34,14 @@ class EveryWordOneFeature(object):
         self.countryPrediction = None
         self.numberOfCityFeatures = {}
 
-    def fit_cities(self, trainingData, cityCode):
-        print "Start fitting cities for country "  + str(cityCode)
+    def fit_cities(self, trainingData, labels, countryCode):
+        print "Start fitting cities for country "  + str(countryCode)
         #TODO: Wieso nimmst du OneVsOne und nicht OneVsRest? Ginge OneVsRest nicht schneller?
-        self.cityClassifier[cityCode] = OneVsOneClassifier(
+        self.cityClassifier[countryCode] = OneVsOneClassifier(
             svm.SVC(kernel=self.kernelType, C=self.slack, gamma=self.gamma, probability=False))
         start = time.time()
-        self.cityClassifier[cityCode].fit(trainingData[:, :self.get_number_of_city_features(cityCode)],
-                                trainingData[:, self.get_number_of_city_features(cityCode)])
+        self.cityClassifier[countryCode].fit(trainingData[:, :self.get_number_of_city_features(countryCode)],
+                                labels)
         end = time.time()
         print "Finished fitting cities in " + str((end - start)) + "s"
 
@@ -74,12 +74,12 @@ class EveryWordOneFeature(object):
 
 
 
-    def predict_cities(self, data, cityCode):
+    def predict_cities(self, data, countryCode):
         print "Start predict cities"
         start = time.time()
         print data[:, :self.numberOfFeatures]
         print self.cityPrediction
-        self.cityPrediction[cityCode] = self.cityClassifier[cityCode].predict(data[:, self.get_number_of_city_features(cityCode)])
+        self.cityPrediction[countryCode] = self.cityClassifier[countryCode].predict(data[:, :self.get_number_of_city_features(countryCode)])
         end = time.time()
         print "Finished predicting cities in " + str((end - start)) + "s"
 
@@ -97,31 +97,31 @@ class EveryWordOneFeature(object):
         self.predict_data = self.bag.get_get_validation_features(predict)
 
     def get_city_featuers(self, data, countryCode):
-        return np.zeros((1, 3))
+        return np.zeros((data.shape[0], 3))
 
     def predict(self, predict):
         self.preprocess_predict_data(predict)
         self.numberOfFeatures = self.predict_data.shape[1]
         # t1 = threading.Thread(target=self.predict_cities)
         self.predict_countries()
-        cityCodes = np.unique(self.countryPrediction)
         joinedCityPredictions = np.zeros(predict.shape[0])
 
-        cityCodes = np.unique(self.data[:, 2])
-        for cityCode in cityCodes:
-            countryIndices = np.where(self.data[:, 1] == cityCode)[0]
+        countryCodes = np.unique(self.data[:, 2].astype(int))
+        for countryCode in countryCodes:
+            countryIndices = np.where(self.data[:, 2].astype(int) == countryCode)[0]
 
-            self.fit_cities(self.get_city_featuers(self.data[countryIndices][:, 0],cityCode), cityCode)
-        for cityCode in cityCodes:
-            countryIndices = np.where(self.countryPrediction == cityCode)[0]
-            self.predict_cities(self.get_city_featuers(predict[countryIndices], cityCode), cityCode)
-            joinedCityPredictions[countryIndices] = self.cityPrediction[cityCode]
+            self.fit_cities(self.get_city_featuers(self.data[countryIndices][:, 0],countryCode), self.data[countryIndices][:,1], countryCode)
+        countryCodes = np.unique(self.countryPrediction)
+        for countryCode in countryCodes:
+            countryIndices = np.where(self.countryPrediction == countryCode)[0]
+            self.predict_cities(self.get_city_featuers(predict[countryIndices], countryCode), countryCode)
+            joinedCityPredictions[countryIndices] = self.cityPrediction[countryCode]
 
         prediction = np.vstack((joinedCityPredictions, self.countryPrediction)).T
         return prediction
 
     def get_number_of_city_features(self, cityCode):
-        3
+        return 3
 
 
 class MyTestCase(unittest.TestCase):
