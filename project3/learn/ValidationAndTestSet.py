@@ -1,3 +1,4 @@
+from project3.learn.NGramLearner import NGramLearner
 from project3.learn.TobisFirstLearner import EveryWordOneFeature
 
 __author__ = 'tobi'
@@ -13,7 +14,7 @@ class MyTestCase(unittest.TestCase):
     def makePrediction(self):
         trainingData = self.import_csv("training.csv")
         print trainingData
-        predictor = EveryWordOneFeature()
+        predictor = NGramLearner()
         print "fit"
         predictor.fit(trainingData)
 
