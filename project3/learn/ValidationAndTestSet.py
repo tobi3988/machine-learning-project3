@@ -16,7 +16,9 @@ class MyTestCase(unittest.TestCase):
         predictor = EveryWordOneFeature()
         print "fit"
         predictor.fit(trainingData)
-        validationData = self.import_csv("validation.csv")[:5000,:]
+
+        validationData = self.import_csv("validation.csv")
+
         print "predict"
         print validationData
         validationResults = predictor.predict(validationData)
